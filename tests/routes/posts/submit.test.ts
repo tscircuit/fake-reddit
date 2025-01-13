@@ -37,7 +37,7 @@ test("create post with minimal fields", async () => {
 
   // Verify post in list
   const { data } = await axios.get("/posts/list")
-  const createdPost = data.posts.find(p => p.title === "Minimal Post")
+  const createdPost = data.posts.find((p: { title: string; body?: string; url?: string }) => p.title === "Minimal Post")
   expect(createdPost).toBeDefined()
   expect(createdPost?.body).toBeUndefined()
   expect(createdPost?.url).toBeUndefined()
