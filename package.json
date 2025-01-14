@@ -1,7 +1,8 @@
 {
-  "name": "debug-api",
-  "module": "index.ts",
+  "name": "@tscircuit/fake-reddit",
+  "main": "dist/bundle.js",
   "type": "module",
+  "version": "0.0.1",
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
     "@types/bun": "latest",
