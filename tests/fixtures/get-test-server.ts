@@ -1,22 +1,15 @@
 import { afterEach } from "bun:test"
 import { tmpdir } from "node:os"
 import defaultAxios from "redaxios"
-import type { Options, Response } from "redaxios"
 import { startServer } from "./start-server"
-
-interface CustomAxios {
-  get: <T = any>(url: string, config?: Options) => Promise<Response<T>>
-  post: <T = any>(url: string, data?: any, config?: Options) => Promise<Response<T>>
-  delete: <T = any>(url: string, config?: Options) => Promise<Response<T>>
-  _authToken: string
-  setAuthToken: (token: string) => void
-  clearAuthToken: () => void
-}
 
 interface TestFixture {
   url: string
   server: any
-  axios: CustomAxios
+  axios: typeof defaultAxios & {
+    setAuthToken(token: string): void
+    clearAuthToken(): void
+  }
 }
 
 export const getTestServer = async (): Promise<TestFixture> => {
@@ -30,32 +23,32 @@ export const getTestServer = async (): Promise<TestFixture> => {
   })
 
   const url = `http://127.0.0.1:${port}`
-  // Create axios instance with base configuration
-  const axiosInstance = defaultAxios.create({
-    baseURL: url
+  const axios = defaultAxios.create({
+    baseURL: url,
+    headers: {}
   })
 
-  // Create wrapped axios instance with auth helper methods
-  const axios: CustomAxios = {
-    get: (url, config = {}) => 
-      axiosInstance.get(url, { ...config, headers: { Authorization: axios._authToken } }),
-    post: (url, data, config = {}) => 
-      axiosInstance.post(url, data, { ...config, headers: { Authorization: axios._authToken } }),
-    delete: (url, config = {}) => 
-      axiosInstance.delete(url, { ...config, headers: { Authorization: axios._authToken } }),
-    _authToken: "",
-    setAuthToken: (token) => { axios._authToken = token },
-    clearAuthToken: () => { axios._authToken = "" }
+  // Helper methods for auth token management
+  const setAuthToken = (token: string) => {
+    if (!axios.defaults.headers) axios.defaults.headers = {}
+    ;(axios.defaults.headers as Record<string, string>)['authorization'] = token
+  }
+
+  const clearAuthToken = () => {
+    if (axios.defaults.headers) {
+      delete (axios.defaults.headers as Record<string, string>)['authorization']
+    }
   }
 
   afterEach(async () => {
     await server.stop()
+    clearAuthToken()
     // Here you might want to add logic to drop the test database
   })
 
   return {
     url,
     server,
-    axios,
+    axios: Object.assign(axios, { setAuthToken, clearAuthToken }),
   }
 }

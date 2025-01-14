@@ -1,9 +1,9 @@
 import { withRouteSpec } from "lib/middleware/with-winter-spec"
 import { withAuth, type AuthContext } from "lib/middleware/with-auth"
-import type { WinterRequest, WinterContext } from "lib/types"
 import { z } from "zod"
 
-export default withRouteSpec<{}, AuthContext>({
+export default withRouteSpec({
+  auth: "auth",
   middleware: [withAuth],
   methods: ["GET"],
   headers: z.object({
@@ -25,12 +25,12 @@ export default withRouteSpec<{}, AuthContext>({
       cookie: z.string(),
     }).optional(),
   }),
-})(async (req: WinterRequest, ctx: WinterContext & AuthContext) => {
+})(async (req, ctx) => {
   if (!ctx.user) {
     return ctx.json({
       error: 401,
       message: "Unauthorized",
-    })
+    }).status(401)
   }
 
   return ctx.json({

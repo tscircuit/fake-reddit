@@ -1,4 +1,5 @@
-import type { Middleware, WinterRequest, WinterContext } from "../types"
+import type { Middleware, WinterSpecRequest } from "winterspec"
+import type { WinterContext } from "../types"
 
 export interface AuthContext {
   user?: {
@@ -15,15 +16,12 @@ export interface AuthContext {
   }
 }
 
-export const withAuth: Middleware<{}, AuthContext> = async (
-  req: WinterRequest,
-  ctx: WinterContext & AuthContext,
-  next: (req: WinterRequest, ctx: WinterContext & AuthContext) => Promise<Response>
-) => {
+export const withAuth: Middleware<WinterContext, AuthContext> = async (req, ctx, next) => {
+  const typedCtx = ctx as WinterContext & Partial<AuthContext>
   const auth = req.headers.get("authorization")
   
   if (auth?.startsWith("Bearer ")) {
-    ctx.user = {
+    typedCtx.user = {
       name: "fake_user",
       created: 1619827200,
       created_utc: 1619827200,
@@ -37,5 +35,5 @@ export const withAuth: Middleware<{}, AuthContext> = async (
     }
   }
 
-  return next(req, ctx)
+  return next(req, typedCtx)
 }

@@ -1,19 +1,11 @@
 import type { z } from "zod"
+import type { WinterSpecRequest, WinterSpecRouteParams, SerializableToResponse, WinterSpecResponse, WinterSpecJsonResponse } from "winterspec"
 
-export interface WinterRequest {
-  headers: Headers
-  query: Record<string, string>
-  body: any
-  json(): Promise<any>
-}
+export type { WinterSpecRequest as WinterRequest, SerializableToResponse as WinterResponse } from "winterspec"
 
 export interface WinterContext {
-  json(data: any): Response
-  db: any
+  json<T>(data: T): WinterSpecJsonResponse<T>
+  db?: any
 }
 
-export type Middleware<ReqExt = {}, CtxExt = {}> = (
-  req: WinterRequest & ReqExt,
-  ctx: WinterContext & CtxExt,
-  next: (req: WinterRequest & ReqExt, ctx: WinterContext & CtxExt) => Promise<Response>
-) => Promise<Response>
+export type { Middleware } from "winterspec"

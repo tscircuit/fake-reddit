@@ -23,7 +23,9 @@ test("handle unauthenticated request", async () => {
   // Clear authorization token
   axios.clearAuthToken()
   
-  const response = await axios.get("/api/v1/me")
+  const response = await axios.get("/api/v1/me", {
+    validateStatus: () => true
+  })
   expect(response.data.error).toBe(401)
   expect(response.data.message).toBe("Unauthorized")
   expect(response.data.name).toBeUndefined()
