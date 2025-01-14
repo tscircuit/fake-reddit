@@ -33,5 +33,5 @@ test("list posts with pagination", async () => {
 
   // Test subreddit filtering
   const subredditResponse = await axios.get("/api/info?sr_name=test")
-  expect(subredditResponse.data.data.children.every(post => post.data.subreddit === "test")).toBe(true)
+  expect(subredditResponse.data.data.children.every((post: {data: {subreddit: string}}) => post.data.subreddit === "test")).toBe(true)
 })
